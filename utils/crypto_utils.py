@@ -2,6 +2,7 @@ import base64
 import json
 import random
 import urllib.parse
+from urllib import response
 
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
@@ -107,6 +108,7 @@ def decrypt_response(encrypted_response):
     except Exception as e:
         raise ValueError(f"Decryption failed: {str(e)}")
 
+
 def decrypt_request(encrypted_request):
     """
     Decrypt an encrypted request parameter.
@@ -140,8 +142,13 @@ def decrypt_request(encrypted_request):
 
 if __name__ == '__main__':
     txt = """
-38af8d116142645b0UrFjqRmh6dyaa6RVzexmXpmHJ56p5SEJcsmdAV67tPk%2Foh5zgEA0RPudOWAFar%2Bt0jvjOeFPYpbHHfUcryaA3g%3D%3D
+
+01b057a05a5442091gjiPN2SCUNb7%2BUiX4ePhhwJZt2Jcc%2BaoJykV6P5BV35jYSCZ4OwYs4x4xer7t2B%2B
+
 """
-    req =urllib.parse.unquote(txt)
+    req = urllib.parse.unquote(txt)
     data = decrypt_request(req)
+
+    # data = decrypt_response(txt)
+
     print(data)
