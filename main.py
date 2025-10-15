@@ -4,7 +4,7 @@ import httpx
 
 from scraper.auth_manager import get_jwt_token
 from scraper.case_manager import get_details_by_cnr
-from scraper.cause_list_manager import get_states, get_districts, get_court_complex
+from scraper.cause_list_manager import get_states, get_districts, get_court_complex, get_court_name
 
 # Configure logging
 logging.basicConfig(
@@ -34,7 +34,8 @@ def main():
             # get_details_by_cnr(client, token, "UPBL060021142023")
             # get_states(client, token)
             # get_districts(client, token, "5")
-            get_court_complex(client, token, "5", "7")
+            # get_court_complex(client, token, "5", "7")
+            get_court_name(client, token, "5", "7", "3")
 
     except Exception as e:
         logger.error(f"Application error: {e}", exc_info=True)

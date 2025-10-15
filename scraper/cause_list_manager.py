@@ -116,3 +116,44 @@ def get_court_complex(
     data = decrypt_response(response.text)
     logger.info(f"Court complex retrieved successfully: {data}")
     return data
+
+
+def get_court_name(
+        client: Client,
+        token: str,
+        state_code: str,
+        district_code: str,
+        court_code: str
+) -> dict:
+    body = {
+        'state_code': state_code,
+        'dist_code': district_code,
+        'court_code': court_code,
+        'language_flag': 'english',
+        'bilingual_flag': '0'
+    }
+
+    enc_body = encrypt_request(body)
+    encoded_body = urllib.parse.quote(enc_body)
+    response = client.get(
+        f"{BASE_URL}/courtNameWebService.php?params={encoded_body}",
+        headers={
+            'Authorization': f'Bearer {encrypt_request(token)}'
+        }
+    )
+
+    if response.status_code == 401 or response.status_code == 403:
+        raise UnauthorizedException(f"Request unauthorised: {response.text}")
+    elif response.status_code != 200:
+        raise BadRequestException(f"Error getting court name data: {response.status_code}: {response.text}")
+
+    try:
+        response.json()
+        raise NotFoundException("No court name data found")
+    except (ValueError, KeyError) as e:
+        # If JSON parsing fails, assume it's encrypted data
+        pass
+
+    data = decrypt_response(response.text)
+    logger.info(f"Court names retrieved successfully: {data}")
+    return data
