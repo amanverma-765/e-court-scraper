@@ -4,7 +4,7 @@ from httpx import Client
 
 from utils.constants import BASE_URL
 from utils.crypto_utils import encrypt_request, decrypt_response
-from utils.exceptions import UnauthorizedException, BadRequestException
+from utils.exceptions import UnauthorizedException, BadRequestException, NotFoundException
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +60,7 @@ def get_default_case_details(
 
     try:
         response.json()
-        return None
+        raise NotFoundException("No case details found")
     except (ValueError, KeyError) as e:
         # If JSON parsing fails, assume it's encrypted data
         pass
@@ -97,7 +97,7 @@ def get_filling_case_details(
 
     try:
         response.json()
-        return None
+        raise NotFoundException("No case details found")
     except (ValueError, KeyError) as e:
         # If JSON parsing fails, assume it's encrypted data
         pass
@@ -135,7 +135,7 @@ def get_case_list(
 
     try:
         response.json()
-        return None
+        raise NotFoundException("No case list found")
     except (ValueError, KeyError) as e:
         # If JSON parsing fails, assume it's encrypted data
         pass
