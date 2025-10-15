@@ -3,7 +3,7 @@ import logging
 import httpx
 
 from scraper.auth_manager import get_jwt_token
-
+from scraper.case_manager import get_details_by_cnr
 
 # Configure logging
 logging.basicConfig(
@@ -30,6 +30,7 @@ def main():
                 logger.error("Failed to fetch auth token, try again.")
                 return
 
+            get_details_by_cnr(client, token, "UPBL060021142023")
 
     except Exception as e:
         logger.error(f"Application error: {e}", exc_info=True)
