@@ -1,2 +1,6 @@
 pycryptodome
 httpx
+fastapi
+uvicorn[standard]
+pydantic
+python-multipart
