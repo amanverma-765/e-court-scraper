@@ -9,17 +9,13 @@ default:
 install:
     uv sync
 
-# Run the API server
+# Run the API server (localhost only)
 run:
-    uv run python -m uvicorn api.main:app --reload
+    uv run uvicorn api.main:app --reload
 
 # Run the API server on all interfaces
 serve:
-    uv run python -m uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
-
-# Run the main.py script
-demo:
-    uv run python main.py
+    uv run uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
 
 # Add a new dependency
 add package:

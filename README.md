@@ -27,14 +27,22 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 git clone https://github.com/amanverma-765/e-court-scraper.git
 cd e-court-scraper
 
-# Create virtual environment and install dependencies (one command!)
+# Install dependencies
 uv sync
 
-# Run the API
-uv run python run_api.py
+# Run the API (choose one method):
 
-# Or run directly with uvicorn
+# Method 1: Using justfile (requires just: https://github.com/casey/just)
+just run
+
+# Method 2: Using the startup script
+./start.sh
+
+# Method 3: Direct uvicorn command
 uv run uvicorn api.main:app --reload
+
+# Method 4: Run as Python module
+uv run python -m api.main
 ```
 
 ### Option 2: Using pip
@@ -45,8 +53,19 @@ git clone https://github.com/amanverma-765/e-court-scraper.git
 cd e-court-scraper
 pip install -r requirements.txt
 
-# Run the API
-python run_api.py
+# Run the API (choose one method):
+
+# Method 1: Using justfile (requires just)
+just run
+
+# Method 2: Using the startup script
+./start.sh
+
+# Method 3: Direct uvicorn command
+uvicorn api.main:app --reload
+
+# Method 4: Run as Python module
+python -m api.main
 ```
 
 API will be available at: **http://localhost:8000**
