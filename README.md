@@ -154,64 +154,22 @@ e-court/
 
 See `requirements.txt` for complete list.
 
-## Architecture
+## How It Works
 
-### JWT Authentication Flow
+This API acts as a wrapper around the e-Courts backend, providing:
+
+1. **Token Generation**: Generate JWT tokens from the e-courts authentication service
+2. **Data Retrieval**: Fetch court data, cause lists, and case details
+3. **Encryption Handling**: Automatically encrypts/decrypts data for e-courts communication
+4. **User Isolation**: Each request maintains independent context for security
+
+### Authentication Flow
 
 ```
-1. Client → POST /auth/token
-   ↓
-2. API generates token from e-courts backend
-   ↓
-3. Client stores token
-   ↓
-4. Client → Any endpoint with "Authorization: Bearer <token>"
-   ↓
-5. API validates token
-   ↓
-6. API creates isolated HTTP client
-   ↓
-7. API encrypts token for e-courts backend
-   ↓
-8. API fetches data from e-courts
-   ↓
-9. API returns data to client
-   ↓
-10. HTTP client closed (per-request isolation)
+Client requests token → API generates from e-courts → Client uses token in requests
 ```
 
-### Security Features
-
-- **Per-request HTTP clients**: Each API call gets its own isolated HTTP client
-- **JWT validation**: Tokens are validated on every request
-- **Token encryption**: Tokens are encrypted before sending to e-courts backend
-- **User context isolation**: No data leakage between users
-
-## Configuration
-
-Key configuration in `utils/constants.py`:
-- `BASE_URL`: E-courts API base URL
-- `DEVICE_ID`: Device identifier for authentication
-
-Encryption keys in `utils/crypto_utils.py`:
-- `ENCRYPTION_KEY`: For request encryption
-- `DECRYPTION_KEY`: For response decryption
-
-## Development
-
-### Running Tests
-
-```bash
-python test_jwt_workflow.py
-```
-
-### Code Style
-
-The codebase follows clean code principles:
-- No unnecessary comments
-- Concise function names
-- Essential logging only
-- Type hints where beneficial
+All authenticated requests include the token in the Authorization header. The API handles encryption and communication with the e-courts backend automatically.
 
 ## Error Handling
 
@@ -229,27 +187,15 @@ Common errors:
 - E-courts backend issues
 - Network problems
 
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
-## License
-
-This project is for educational and research purposes.
-
 ## Disclaimer
 
-This API is not officially affiliated with e-Courts India. Use responsibly and in accordance with e-Courts terms of service.
+This API is not officially affiliated with e-Courts India. This project is intended for educational and research purposes only. Please use responsibly and in accordance with e-Courts terms of service.
 
 ## Support
 
-For issues and questions:
-- Create an issue on GitHub
-- Check existing documentation in `API_DOCS.md`
+- 📖 Detailed API reference: See [API_DOCS.md](API_DOCS.md)
+- 🐛 Report issues: [GitHub Issues](https://github.com/amanverma-765/e-court-scraper/issues)
+- 💡 Feature requests: Open an issue with your suggestion
 
 ---
 
