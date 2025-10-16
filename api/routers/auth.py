@@ -22,14 +22,21 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
         500: {"model": ErrorResponse, "description": "Failed to generate token"},
     },
     summary="Generate JWT Token",
-    description="Generate a JWT token for authenticating with e-courts API"
+    description="""Generate a JWT token for authenticating with e-courts API.
+    
+    This token should be used in the Authorization header for all subsequent API requests:
+    `Authorization: Bearer <token>`
+    
+    The token is used to authenticate requests to e-courts backend services."""
 )
 async def get_token(client: httpx.Client = Depends(get_http_client)) -> dict:
     """
     Generate JWT token for API authentication.
     
+    The generated token must be passed in the Authorization header for all other endpoints.
+    
     Returns:
-        dict: Contains the JWT token
+        dict: Contains the JWT token to be used in Authorization header
         
     Raises:
         HTTPException: If token generation fails
@@ -50,7 +57,7 @@ async def get_token(client: httpx.Client = Depends(get_http_client)) -> dict:
         return {
             "status": "success",
             "code": 200,
-            "message": "Token generated successfully",
+            "message": "Token generated successfully. Use this token in Authorization header as 'Bearer <token>' for all API requests",
             "data": {"token": token}
         }
     except Exception as e:
@@ -60,3 +67,6 @@ async def get_token(client: httpx.Client = Depends(get_http_client)) -> dict:
             "code": 500,
             "message": f"Failed to generate token: {str(e)}"
         }
+    finally:
+        # Close the client after use since it's per-request
+        client.close()

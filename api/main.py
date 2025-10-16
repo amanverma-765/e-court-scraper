@@ -7,11 +7,12 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from api.routers import auth as auth_routes
 from api.routers import cases as cases_routes
 from api.routers import cause_list as cause_list_routes
-from api.dependencies import close_http_client, get_http_client
 from api.exceptions import register_exception_handlers
 from api.schemas import HealthCheckResponse
 
@@ -30,29 +31,28 @@ async def lifespan(app: FastAPI):
     """
     # Startup
     logger.info("E-Courts API starting up")
-    try:
-        # Initialize HTTP client
-        get_http_client()
-        logger.info("HTTP client initialized")
-    except Exception as e:
-        logger.error(f"Error during startup: {e}", exc_info=True)
-        raise
+    logger.info("Using per-request HTTP clients for user isolation")
     
     yield
     
     # Shutdown
     logger.info("E-Courts API shutting down")
-    try:
-        close_http_client()
-        logger.info("HTTP client closed")
-    except Exception as e:
-        logger.error(f"Error during shutdown: {e}", exc_info=True)
 
 
 # Create FastAPI application
 app = FastAPI(
     title="E-Courts API",
-    description="REST API for accessing Indian e-Courts data",
+    description="""REST API for accessing Indian e-Courts data.
+    
+## Authentication
+
+1. **Generate Token**: Call `POST /auth/token` to get a JWT token
+2. **Authorize**: Click the 🔓 Authorize button (top right)
+3. **Enter Token**: Paste your token in the value field (without 'Bearer' prefix)
+4. **Use APIs**: All authenticated endpoints will now work
+
+The token will be automatically included in the `Authorization: Bearer <token>` header.
+    """,
     version="1.0.0",
     lifespan=lifespan
 )

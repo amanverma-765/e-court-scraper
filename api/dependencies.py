@@ -5,11 +5,19 @@ Dependencies for FastAPI routes.
 import logging
 import httpx
 from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from typing import Optional
 
-from scraper.auth_manager import get_jwt_token
 from utils.constants import BASE_URL
 
 logger = logging.getLogger(__name__)
+
+# Security scheme for Swagger UI
+security = HTTPBearer(
+    scheme_name="Bearer Token",
+    description="Enter your JWT token (obtained from POST /auth/token endpoint)",
+    auto_error=False
+)
 
 # HTTP Client configuration
 HEADERS = {
@@ -20,45 +28,52 @@ HEADERS = {
     "Connection": "keep-alive",
 }
 
-# Global HTTP client
-_http_client: httpx.Client | None = None
-
 
 def get_http_client() -> httpx.Client:
-    """Get or create HTTP client."""
-    global _http_client
-    if _http_client is None:
-        _http_client = httpx.Client(headers=HEADERS, timeout=20, follow_redirects=True)
-    return _http_client
-
-
-def close_http_client() -> None:
-    """Close the HTTP client."""
-    global _http_client
-    if _http_client is not None:
-        _http_client.close()
-        _http_client = None
-
-
-async def get_auth_token(client: httpx.Client = Depends(get_http_client)) -> str:
     """
-    Dependency to get JWT token.
+    Create a new HTTP client for each request.
+    This ensures each user context has its own isolated HTTP client.
+    """
+    return httpx.Client(headers=HEADERS, timeout=20, follow_redirects=True)
+
+
+async def get_auth_token(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security)
+) -> str:
+    """
+    Dependency to extract and validate JWT token from Authorization header.
+    
+    This function works with FastAPI's HTTPBearer security scheme, which automatically:
+    - Extracts the Bearer token from the Authorization header
+    - Provides Swagger UI integration with the 🔓 Authorize button
+    - Validates the token format
+    
+    Args:
+        credentials: HTTP Bearer credentials from the Authorization header
+    
+    Returns:
+        str: Plain JWT token (not encrypted)
     
     Raises:
-        HTTPException: If token retrieval fails
+        HTTPException: If token is missing or invalid
     """
-    try:
-        token = get_jwt_token(client)
-        if token is None:
-            logger.error("Failed to fetch JWT token")
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Failed to authenticate with e-courts API"
-            )
-        return token
-    except Exception as e:
-        logger.error(f"Token retrieval failed: {e}")
+    if not credentials:
+        logger.error("Authorization header missing or invalid")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Failed to authenticate with e-courts API"
+            detail="Authorization header is required. Use the 🔓 Authorize button in Swagger UI or include 'Authorization: Bearer <token>' header",
+            headers={"WWW-Authenticate": "Bearer"},
         )
+    
+    token = credentials.credentials
+    
+    if not token:
+        logger.error("Token is empty")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="JWT token cannot be empty",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    logger.info("JWT token extracted successfully from Authorization header")
+    return token

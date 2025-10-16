@@ -82,3 +82,6 @@ async def get_case_details(
     except Exception as e:
         logger.error(f"Error fetching case details for CNR {cnr}: {e}", exc_info=True)
         raise
+    finally:
+        # Close the client after use since it's per-request
+        client.close()

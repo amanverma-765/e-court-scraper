@@ -88,6 +88,9 @@ async def fetch_states(
     except Exception as e:
         logger.error(f"Error fetching states: {e}", exc_info=True)
         raise
+    finally:
+        # Close the client after use since it's per-request
+        client.close()
 
 
 @router.post(
@@ -147,6 +150,9 @@ async def fetch_districts(
     except Exception as e:
         logger.error(f"Error fetching districts for state {request.state_code}: {e}", exc_info=True)
         raise
+    finally:
+        # Close the client after use since it's per-request
+        client.close()
 
 
 @router.post(
@@ -206,6 +212,9 @@ async def fetch_court_complex(
     except Exception as e:
         logger.error(f"Error fetching court complex: {e}", exc_info=True)
         raise
+    finally:
+        # Close the client after use since it's per-request
+        client.close()
 
 
 @router.post(
@@ -265,6 +274,9 @@ async def fetch_court_names(
     except Exception as e:
         logger.error(f"Error fetching court names: {e}", exc_info=True)
         raise
+    finally:
+        # Close the client after use since it's per-request
+        client.close()
 
 
 @router.post(
@@ -341,3 +353,6 @@ async def fetch_cause_list(
     except Exception as e:
         logger.error(f"Error fetching cause list: {e}", exc_info=True)
         raise
+    finally:
+        # Close the client after use since it's per-request
+        client.close()
