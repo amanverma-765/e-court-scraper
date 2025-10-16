@@ -15,6 +15,30 @@ High-performance REST API for accessing Indian e-Courts data with JWT authentica
 
 ## Installation & Setup
 
+### Option 1: Using uv (Recommended ⚡)
+
+[uv](https://github.com/astral-sh/uv) is an extremely fast Python package installer and resolver.
+
+```bash
+# Install uv (if not already installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Clone and setup
+git clone https://github.com/amanverma-765/e-court-scraper.git
+cd e-court-scraper
+
+# Create virtual environment and install dependencies (one command!)
+uv sync
+
+# Run the API
+uv run python run_api.py
+
+# Or run directly with uvicorn
+uv run uvicorn api.main:app --reload
+```
+
+### Option 2: Using pip
+
 ```bash
 # Clone and install
 git clone https://github.com/amanverma-765/e-court-scraper.git
