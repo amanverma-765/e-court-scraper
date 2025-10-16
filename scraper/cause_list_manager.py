@@ -12,121 +12,98 @@ from utils.exceptions import UnauthorizedException, BadRequestException, NotFoun
 logger = logging.getLogger(__name__)
 
 
-def get_states(
-        client: Client,
-        token: str
-) -> dict:
-    body = {
-        'action_code': 'fillState',
-        'time': str(time.time())
-    }
+def get_states(client: Client, token: str) -> dict:
+    body = {'action_code': 'fillState', 'time': str(time.time())}
     enc_body = encrypt_request(body)
     encoded_body = urllib.parse.quote(enc_body)
+    
     response = client.get(
         f"{BASE_URL}/stateWebService.php?params={encoded_body}",
-        headers={
-            'Authorization': f'Bearer {encrypt_request(token)}'
-        }
+        headers={'Authorization': f'Bearer {encrypt_request(token)}'}
     )
 
-    if response.status_code == 401 or response.status_code == 403:
-        raise UnauthorizedException(f"Request unauthorised: {response.text}")
+    if response.status_code in [401, 403]:
+        raise UnauthorizedException("Token expired or invalid")
     elif response.status_code != 200:
-        raise BadRequestException(f"Error getting states data: {response.status_code}: {response.text}")
+        raise BadRequestException(f"Error: {response.status_code}")
 
     try:
         response.json()
-        raise NotFoundException("No state data found")
-    except (ValueError, KeyError) as e:
-        # If JSON parsing fails, assume it's encrypted data
+        raise NotFoundException("No data found")
+    except (ValueError, KeyError):
         pass
 
     data = decrypt_response(response.text)
-    logger.info(f"States retrieved successfully: {data}")
+    
+    if isinstance(data, dict) and data.get('status') == 'N' and 'UnAuthorized' in str(data.get('Msg', '')):
+        raise UnauthorizedException("Token expired or invalid. Generate a new token from /auth/token")
+    
     return data
 
 
-def get_districts(
-        client: Client,
-        token: str,
-        state_code: str
-) -> dict:
-    body = {
-        'state_code': state_code,
-        'test_param': 'pending'
-    }
-
+def get_districts(client: Client, token: str, state_code: str) -> dict:
+    body = {'state_code': state_code, 'test_param': 'pending'}
     enc_body = encrypt_request(body)
     encoded_body = urllib.parse.quote(enc_body)
+    
     response = client.get(
         f"{BASE_URL}/districtWebService.php?params={encoded_body}",
-        headers={
-            'Authorization': f'Bearer {encrypt_request(token)}'
-        }
+        headers={'Authorization': f'Bearer {encrypt_request(token)}'}
     )
 
-    if response.status_code == 401 or response.status_code == 403:
-        raise UnauthorizedException(f"Request unauthorised: {response.text}")
+    if response.status_code in [401, 403]:
+        raise UnauthorizedException("Token expired or invalid")
     elif response.status_code != 200:
-        raise BadRequestException(f"Error getting district data: {response.status_code}: {response.text}")
+        raise BadRequestException(f"Error: {response.status_code}")
 
     try:
         response.json()
-        raise NotFoundException("No district data found")
-    except (ValueError, KeyError) as e:
-        # If JSON parsing fails, assume it's encrypted data
+        raise NotFoundException("No data found")
+    except (ValueError, KeyError):
         pass
 
     data = decrypt_response(response.text)
-    logger.info(f"Districts retrieved successfully: {data}")
+    
+    if isinstance(data, dict) and data.get('status') == 'N' and 'UnAuthorized' in str(data.get('Msg', '')):
+        raise UnauthorizedException("Token expired or invalid. Generate a new token from /auth/token")
+    
     return data
 
 
-def get_court_complex(
-        client: Client,
-        token: str,
-        state_code: str,
-        district_code: str,
-) -> dict:
+def get_court_complex(client: Client, token: str, state_code: str, district_code: str) -> dict:
     body = {
         'action_code': 'fillCourtComplex',
         'state_code': state_code,
         'dist_code': district_code
     }
-
     enc_body = encrypt_request(body)
     encoded_body = urllib.parse.quote(enc_body)
+    
     response = client.get(
         f"{BASE_URL}/courtEstWebService.php?params={encoded_body}",
-        headers={
-            'Authorization': f'Bearer {encrypt_request(token)}'
-        }
+        headers={'Authorization': f'Bearer {encrypt_request(token)}'}
     )
 
-    if response.status_code == 401 or response.status_code == 403:
-        raise UnauthorizedException(f"Request unauthorised: {response.text}")
+    if response.status_code in [401, 403]:
+        raise UnauthorizedException("Token expired or invalid")
     elif response.status_code != 200:
-        raise BadRequestException(f"Error getting court complex data: {response.status_code}: {response.text}")
+        raise BadRequestException(f"Error: {response.status_code}")
 
     try:
         response.json()
-        raise NotFoundException("No court complex data found")
-    except (ValueError, KeyError) as e:
-        # If JSON parsing fails, assume it's encrypted data
+        raise NotFoundException("No data found")
+    except (ValueError, KeyError):
         pass
 
     data = decrypt_response(response.text)
-    logger.info(f"Court complex retrieved successfully: {data}")
+    
+    if isinstance(data, dict) and data.get('status') == 'N' and 'UnAuthorized' in str(data.get('Msg', '')):
+        raise UnauthorizedException("Token expired or invalid. Generate a new token from /auth/token")
+    
     return data
 
 
-def get_court_name(
-        client: Client,
-        token: str,
-        state_code: str,
-        district_code: str,
-        court_code: str
-) -> dict:
+def get_court_name(client: Client, token: str, state_code: str, district_code: str, court_code: str) -> dict:
     body = {
         'state_code': state_code,
         'dist_code': district_code,
@@ -134,30 +111,30 @@ def get_court_name(
         'language_flag': 'english',
         'bilingual_flag': '0'
     }
-
     enc_body = encrypt_request(body)
     encoded_body = urllib.parse.quote(enc_body)
+    
     response = client.get(
         f"{BASE_URL}/courtNameWebService.php?params={encoded_body}",
-        headers={
-            'Authorization': f'Bearer {encrypt_request(token)}'
-        }
+        headers={'Authorization': f'Bearer {encrypt_request(token)}'}
     )
 
-    if response.status_code == 401 or response.status_code == 403:
-        raise UnauthorizedException(f"Request unauthorised: {response.text}")
+    if response.status_code in [401, 403]:
+        raise UnauthorizedException("Token expired or invalid")
     elif response.status_code != 200:
-        raise BadRequestException(f"Error getting court name data: {response.status_code}: {response.text}")
+        raise BadRequestException(f"Error: {response.status_code}")
 
     try:
         response.json()
-        raise NotFoundException("No court name data found")
-    except (ValueError, KeyError) as e:
-        # If JSON parsing fails, assume it's encrypted data
+        raise NotFoundException("No data found")
+    except (ValueError, KeyError):
         pass
 
     data = decrypt_response(response.text)
-    logger.info(f"Court names retrieved successfully: {data}")
+    
+    if isinstance(data, dict) and data.get('status') == 'N' and 'UnAuthorized' in str(data.get('Msg', '')):
+        raise UnauthorizedException("Token expired or invalid. Generate a new token from /auth/token")
+    
     return data
 
 
@@ -209,6 +186,8 @@ def get_cause_list(
 
     try:
         data = decrypt_response(response.text)
+        if isinstance(data, dict) and data.get('status') == 'N' and 'UnAuthorized' in str(data.get('Msg', '')):
+            raise UnauthorizedException("Token expired or invalid. Generate a new token from /auth/token")
         logger.info(f"Cause list retrieved successfully: {data}")
         return data
     except(ValueError, KeyError) as e:

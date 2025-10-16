@@ -1,19 +1,12 @@
 import base64
 import json
 import random
-import urllib.parse
-from urllib import response
-
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 
-# Encryption key for requests (hex-encoded)
 ENCRYPTION_KEY = bytes.fromhex('4D6251655468576D5A7134743677397A')
-
-# Decryption key for responses (hex-encoded)
 DECRYPTION_KEY = bytes.fromhex('3273357638782F413F4428472B4B6250')
 
-# Array of predefined IV prefixes (hex-encoded)
 GLOBAL_IV_OPTIONS = [
     "556A586E32723575",
     "34743777217A2543",
@@ -25,31 +18,10 @@ GLOBAL_IV_OPTIONS = [
 
 
 def generate_random_hex(size):
-    """
-    Generate a random hexadecimal string of specified size.
-    """
     return ''.join(random.choice('0123456789abcdef') for _ in range(size))
 
 
-def encrypt_request(data: dict):
-    """
-    Encrypt data for API request.
-
-    The encryption process:
-    1. Convert data to JSON string
-    2. Randomly select a global IV prefix from predefined options
-    3. Generate a random 16-character hex string
-    4. Combine them to create 32-character IV
-    5. Encrypt using AES-128-CBC
-    6. Encode ciphertext as Base64
-    7. Prepend random IV + global IV index to the encrypted data
-
-    Args:
-        data (dict): Dictionary containing request data
-
-    Returns:
-        str: Encrypted data string with format: randomiv + globalIndex + base64_encrypted_data
-    """
+def encrypt_request(data):
     data_json = json.dumps(data, separators=(',', ':'))
 
     global_index = random.randint(0, len(GLOBAL_IV_OPTIONS) - 1)
@@ -72,26 +44,8 @@ def encrypt_request(data: dict):
 
 
 def decrypt_response(encrypted_response):
-    """
-    Decrypt API response.
-
-    The decryption process:
-    1. Extract IV from first 32 characters
-    2. Extract encrypted data from remaining characters
-    3. Decode from Base64
-    4. Decrypt using AES-128-CBC
-    5. Remove padding
-    6. Parse JSON response
-
-    Args:
-        encrypted_response (str): Encrypted response string
-
-    Returns:
-        dict: Decrypted JSON data as dictionary
-    """
     try:
         encrypted_response = encrypted_response.strip()
-
         iv_hex = encrypted_response[:32]
         iv = bytes.fromhex(iv_hex)
 
@@ -104,15 +58,11 @@ def decrypt_response(encrypted_response):
 
         plaintext = decrypted_data.decode('utf-8')
         return json.loads(plaintext)
-
     except Exception as e:
         raise ValueError(f"Decryption failed: {str(e)}")
 
 
 def decrypt_request(encrypted_request):
-    """
-    Decrypt an encrypted request parameter.
-    """
     try:
         encrypted_request = encrypted_request.strip()
 
@@ -138,18 +88,3 @@ def decrypt_request(encrypted_request):
 
     except Exception as e:
         raise ValueError(f"Request decryption failed: {str(e)}")
-
-
-if __name__ == '__main__':
-    txt = """
-
-65cfdafaad8a03b75D7vdzVgV5qRKPHxsl%2BhNxY2ikfInoVLQPVGVElqOZOCJO04tsioWFTdCCKkKw%2Bs%2FiRlMR11GN%2FlvjHB8tCCq%2B6TjFr9haILY8nLJe4q0A9sD1u1r6gnBHGSoaWuNhAHq8h7rqjVb969TUort2OJdQYHtxAraIubV49e5HnHAmER%2FI6m%2BFYPIcqvdFootQblomkfraPlCA9H2M%2BRLWUTZstwmsgPNxmxT8A79fZ6JhKOMWsuSyzJtJBUdIkkYxWtZTCltBS8xAQUZhMKw9bKAgLhvgj2NcXDi08PKl0m3JxeZUCZ6IdEu4qfgUPbi2L4H
-
-
-"""
-    req = urllib.parse.unquote(txt)
-    data = decrypt_request(req)
-
-    # data = decrypt_response(txt)
-
-    print(data)

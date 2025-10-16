@@ -9,28 +9,18 @@ from utils.exceptions import UnauthorizedException, BadRequestException, NotFoun
 logger = logging.getLogger(__name__)
 
 
-def get_details_by_cnr(
-        client: Client,
-        token: str,
-        cnr: str
-) -> dict:
+def get_details_by_cnr(client: Client, token: str, cnr: str) -> dict:
     try:
-        logger.info(f"Getting details for CNR: {cnr}")
         case_list = get_case_list(client, token, cnr)
         if case_list.get("case_number") is None:
-            logger.info("Retrieving filling case details for CNR")
-            details = get_filling_case_details(client, token, cnr)
-            return details
+            return get_filling_case_details(client, token, cnr)
         else:
-            logger.info("Retrieving default case details for CNR")
-            details = get_default_case_details(client, token, cnr)
-            return details
-
-    except UnauthorizedException as ue:
-        raise ue
+            return get_default_case_details(client, token, cnr)
+    except UnauthorizedException:
+        raise
     except Exception as e:
-        logger.error(f"Failed to get case details by CNR: {e}")
-        raise e
+        logger.error(f"Failed to get case details: {e}")
+        raise
 
 
 def get_default_case_details(
@@ -66,6 +56,8 @@ def get_default_case_details(
         pass
 
     data = decrypt_response(response.text)
+    if isinstance(data, dict) and data.get('status') == 'N' and 'UnAuthorized' in str(data.get('Msg', '')):
+        raise UnauthorizedException("Token expired or invalid. Generate a new token from /auth/token")
     logger.info(f"Default Case details retrieved by cnr: {data}")
     return data
 
@@ -103,6 +95,8 @@ def get_filling_case_details(
         pass
 
     data = decrypt_response(response.text)
+    if isinstance(data, dict) and data.get('status') == 'N' and 'UnAuthorized' in str(data.get('Msg', '')):
+        raise UnauthorizedException("Token expired or invalid. Generate a new token from /auth/token")
     logger.info(f"Default Case details retrieved by cnr: {data}")
     return data
 
@@ -141,5 +135,7 @@ def get_case_list(
         pass
 
     data = decrypt_response(response.text)
+    if isinstance(data, dict) and data.get('status') == 'N' and 'UnAuthorized' in str(data.get('Msg', '')):
+        raise UnauthorizedException("Token expired or invalid. Generate a new token from /auth/token")
     logger.info(f"Default Case details retrieved by cnr: {data}")
     return data
