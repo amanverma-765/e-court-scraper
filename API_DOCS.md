@@ -39,7 +39,11 @@ curl -X POST http://localhost:8000/auth/token
 }
 ```
 
-**Note:** Tokens expire in ~10 minutes. Generate a new token when you receive 401 errors.
+**Token Details:**
+- Tokens are generated from the e-courts backend
+- Token expiry: ~10 minutes (600 seconds)
+- When token expires, you'll receive a 401 error with message: "Token expired or invalid"
+- Generate a new token from `/auth/token` and use it in subsequent requests
 
 ---
 
@@ -95,14 +99,36 @@ curl -X GET "http://localhost:8000/court/states" \
   "code": 200,
   "message": "States retrieved",
   "data": {
-    "state_list": [
+    "states": [
       {
-        "state_code": "1",
-        "state_name": "Andhra Pradesh"
+        "state_code": 1,
+        "state_name": "Maharashtra",
+        "marstate_name": "महाराष्ट्र",
+        "nationalstate_code": "MH",
+        "st_census_code": 27,
+        "state_lang": "marathi",
+        "bilingual": "Y",
+        "state_name_marathi": "महाराष्ट्र",
+        "state_name_hindi": "महाराष्ट्र",
+        "state_name_gujrati": "મહારાષ્ટ્ર",
+        "state_name_kannada": "ಮಹಾರಾಷ್ಟ್ರ",
+        "state_name_tamil": "மகாராஷ்டிரா",
+        "esummons_sharing": "Y"
       },
       {
-        "state_code": "2",
-        "state_name": "Arunachal Pradesh"
+        "state_code": 2,
+        "state_name": "Andhra Pradesh",
+        "marstate_name": "",
+        "nationalstate_code": "AP",
+        "st_census_code": 28,
+        "state_lang": "",
+        "bilingual": "N",
+        "state_name_marathi": "आंध्र प्रदेश ",
+        "state_name_hindi": "आंध्र प्रदेश",
+        "state_name_gujrati": "આન્ધ્ર પ્રદેશ",
+        "state_name_kannada": "ಆಂಧ್ರಪ್ರದೇಶ",
+        "state_name_tamil": "ஆந்திரப் பிரதேசம்",
+        "esummons_sharing": "Y"
       }
     ]
   }
@@ -145,10 +171,27 @@ curl -X POST "http://localhost:8000/court/districts" \
   "code": 200,
   "message": "Districts retrieved",
   "data": {
-    "district_list": [
+    "districts": [
       {
-        "district_code": "1",
-        "district_name": "Anantapur"
+        "dist_code": 26,
+        "dist_name": "Ahmednagar",
+        "mardist_name": "अहमदनगर",
+        "dist_census_code": 522,
+        "lg_dist_code": 466
+      },
+      {
+        "dist_code": 5,
+        "dist_name": "Akola",
+        "mardist_name": "अकोला",
+        "dist_census_code": 501,
+        "lg_dist_code": 467
+      },
+      {
+        "dist_code": 7,
+        "dist_name": "Amravati",
+        "mardist_name": "अमरावती",
+        "dist_census_code": 503,
+        "lg_dist_code": 468
       }
     ]
   }
@@ -196,10 +239,25 @@ curl -X POST "http://localhost:8000/court/complex" \
   "code": 200,
   "message": "Court complex retrieved",
   "data": {
-    "court_complex_list": [
+    "courtComplex": [
       {
-        "court_code": "1",
-        "court_complex_name": "District Court Complex"
+        "complex_code": 1010306,
+        "njdg_est_code": "14",
+        "court_complex_name": "Rahuri, Civil and Criminal Court",
+        "lcourt_complex_name": "दिवाणी न्यायाधीश, कनिष्ठ स्तर आणि प्रथमवर्ग न्यायदंडाधिकारी, यांचे न्यायालय, राहुरी ४१३७०५",
+        "njdg_state_code": 1,
+        "njdg_dist_code": 26,
+        "differ_mast_est": "N",
+        "14": {
+          "14": {
+            "db_name": "ahmrahuricjjd",
+            "court_name": "Civil Court Junior Division, Rahuri",
+            "mcourt_name": "दिवाणी न्यायालय कनिष्ट स्तर, राहूरी",
+            "server_ip": "10.192.102.226",
+            "court_code": 14,
+            "national_court_code": "MHAH18"
+          }
+        }
       }
     ]
   }
@@ -249,15 +307,15 @@ curl -X POST "http://localhost:8000/court/names" \
   "code": 200,
   "message": "Court names retrieved",
   "data": {
-    "court_list": [
-      {
-        "court_number": "1",
-        "court_name": "Court No. 1"
-      }
-    ]
+    "courtNames": "0~Select Court Name#D~--------Civil Court Junior Division, Rahuri--------#14^2~2-Shri. Pankaj H. Patil-2nd Jt. Civil Judge J.D. And JMFC#14^10~10-Smt. Anupama C. Parshetti-Jt Civil Judge J.D. And JMFC#14^11~11-Shri. A. K. Shinde-3rd Jt Civil Judge JD and JMFC#14^12~12-Shri. M. E. Pawar-Civil Judge Senior Division"
   }
 }
 ```
+
+**Note:** The response is a specially formatted string where:
+- `#` separates entries
+- `^` separates court code and details
+- `~` separates different fields within an entry
 
 **Status Codes:**
 - `200` - Court names retrieved successfully
@@ -308,17 +366,12 @@ curl -X POST "http://localhost:8000/court/cause-list" \
   "code": 200,
   "message": "Cause list retrieved",
   "data": {
-    "cases": [
-      {
-        "case_number": "CS/123/2024",
-        "filing_date": "01-01-2024",
-        "party_names": "ABC vs XYZ",
-        "stage": "Hearing"
-      }
-    ]
+    "cases": "<div id='table_heading'><center><center>Shri. Pankaj H. Patil<br/>2nd Jt. Civil Judge J.D. And JMFC</center>Civil Cases Listed on 16-10-2025</center></div><table width='80%' align='center' class='table table-responsive table-bordered' cellspacing='0' cellpadding='0' border='1'><thead style='text-align:center;'><th style='text-align:center'>Sr No</th><th style='text-align:center'>Case Number</th><th style='text-align:center'>Party Name</th><th style='text-align:center'>Advocate</th></thead><tbody><tr><td colspan='4' style='color:#3880d4'>Urgent Cases</td></tr><tr><td>1</td><td>R.C.S./633/2019<br/>16-10-2025</td><td>Jalindar Soma Dhanvade<br/>versus<br/>Sharda Babasaheb Bhambal</td><td>Kobarne V. G.<br/><br/>Dolse T. B.</td></tr></tbody></table>"
   }
 }
 ```
+
+**Note:** The response contains an HTML table with the cause list. You may need to parse the HTML to extract structured data.
 
 **Status Codes:**
 - `200` - Cause list retrieved successfully
@@ -353,22 +406,34 @@ curl -X GET "http://localhost:8000/cases/details?cnr=DLHC010123452024" \
   "code": 200,
   "message": "Case details retrieved",
   "data": {
-    "case_number": "CS/123/2024",
-    "filing_date": "01-01-2024",
-    "registration_date": "02-01-2024",
-    "case_type": "Civil Suit",
-    "petitioner": "ABC Company Ltd.",
-    "respondent": "XYZ Corporation",
-    "petitioner_advocate": "Adv. John Doe",
-    "respondent_advocate": "Adv. Jane Smith",
-    "case_status": "Pending",
-    "next_hearing_date": "20-10-2025",
-    "history": [
-      {
-        "date": "15-10-2025",
-        "proceeding": "Case listed for hearing"
-      }
-    ]
+    "history": {
+      "regcase_type": 1,
+      "date_of_filing": "2024-01-08",
+      "cino": "MHAH010002332024",
+      "dt_regis": "2024-01-15",
+      "fil_no": 170,
+      "fil_year": 2024,
+      "reg_no": 10,
+      "reg_year": 2024,
+      "date_first_list": "2024-01-18",
+      "date_next_list": "2025-11-21",
+      "case_no": "200100000102024",
+      "type_name": "R.C.A.",
+      "ltype_name": "नियमित दिवाणी अपील",
+      "pet_name": "Vilas Vitthal Kadus",
+      "lpet_name": "विलास विठ्ठल कडुस",
+      "pet_adv": "Athare P. V.",
+      "lpet_adv": "आठरे पी. व्ही.",
+      "res_name": "Chandar Mahammad Pawar",
+      "lres_name": "चंदर महंमद पवार",
+      "res_adv": "NIL",
+      "lres_adv": "माहीती अपूर्ण",
+      "case_status": "Pending",
+      "purpose_name": "Awaiting Notice",
+      "lpurpose_name": "नोटीस येणेसाठी",
+      "court_no": 11,
+      "date_last_list": "2025-10-10"
+    }
   }
 }
 ```
@@ -435,21 +500,45 @@ curl -X GET "http://localhost:8000/"
 
 ## Error Responses
 
-All error responses follow this format:
+### 401 Unauthorized - Missing Token
 
+**Request without Authorization header:**
+```bash
+curl -X GET "http://localhost:8000/court/states"
+```
+
+**Response:**
+```json
+{
+  "detail": "Authorization required. Use 'Authorization: Bearer <token>' header"
+}
+```
+
+### 401 Unauthorized - Invalid/Expired Token
+
+**Request with invalid token:**
+```bash
+curl -X GET "http://localhost:8000/court/states" \
+  -H "Authorization: Bearer invalid_token"
+```
+
+**Response:**
 ```json
 {
   "status": "error",
   "code": 401,
-  "message": "Authorization required. Use 🔓 Authorize button or add 'Authorization: Bearer <token>' header"
+  "message": "Authentication failed or token expired",
+  "details": {
+    "error": "Token expired or invalid. Generate a new token from /auth/token"
+  }
 }
 ```
 
 ### Common Error Codes
 
-- `400 Bad Request` - Invalid input parameters
-- `401 Unauthorized` - Missing or invalid authentication token
-- `404 Not Found` - Requested resource not found
+- `400 Bad Request` - Invalid input parameters (e.g., invalid cause_list_type, missing required fields)
+- `401 Unauthorized` - Missing, invalid, or expired authentication token
+- `404 Not Found` - Requested resource not found (no data available for given parameters)
 - `500 Internal Server Error` - Server-side error or e-courts backend issue
 
 ---
@@ -550,6 +639,38 @@ curl -X POST "http://localhost:8000/court/districts" \
   -H "Content-Type: application/json" \
   -d '{"state_code": "1"}'
 ```
+
+---
+
+## Data Format Notes
+
+### Response Structures
+
+Different endpoints return data in different formats based on how the e-courts backend provides them:
+
+1. **States & Districts**: Returns structured JSON arrays with objects
+2. **Court Complex**: Returns nested JSON with complex structure including database connection details
+3. **Court Names**: Returns a **specially formatted string** (not array) with delimiters:
+   - `#` separates entries
+   - `^` separates court code and details  
+   - `~` separates fields within an entry
+   - You'll need to parse this string to extract court information
+
+4. **Cause List**: Returns an **HTML table** as a string
+   - Contains formatted HTML with court listings
+   - You may need to parse HTML to extract structured data
+   - Includes case numbers, party names, advocates, and hearing dates
+
+5. **Case Details**: Returns structured JSON with comprehensive case information
+   - Includes bilingual fields (English and regional language)
+   - Contains filing dates, party names, advocates, case status, and hearing dates
+
+### Multilingual Support
+
+Many fields include both English and regional language versions:
+- `state_name` and `marstate_name` (Marathi)
+- `pet_name` (petitioner) and `lpet_name` (local language)
+- `type_name` (case type) and `ltype_name` (local language)
 
 ---
 
